@@ -14,8 +14,10 @@ namespace DuplicaionCleaner
 {
 	public class CleanerWindow : EditorWindow
 	{
-		protected static AssetBase m_CurrentAssetBase;
-		protected static MaterialAsset m_MaterialAssets;
+		protected AssetBase m_CurrentAssetBase;
+		protected FBXAsset m_FBXAssets;
+		protected MaterialAsset m_MaterialAssets;
+		protected TextureAsset m_TextureAsset;
 		protected Vector2 m_DuplicationAssetScrollPosition;
 		protected string[] m_AssetTypes;
 
@@ -27,15 +29,28 @@ namespace DuplicaionCleaner
 
 		protected void Initialize()
 		{
-			if(m_MaterialAssets == null)
+			if(m_FBXAssets == null)
 			{
-				m_MaterialAssets = new MaterialAsset(Config.Material_Choosed_Config_Path);
+				m_FBXAssets = new FBXAsset(Config.Asset_Choosed_Config_Save_Folder);
+				m_FBXAssets.LoadChooseConfig();
+			}
+
+			if (m_MaterialAssets == null)
+			{
+				m_MaterialAssets = new MaterialAsset(Config.Asset_Choosed_Config_Save_Folder);
 				m_MaterialAssets.LoadChooseConfig();
+			}
+
+			if (m_TextureAsset == null)
+			{
+				m_TextureAsset = new TextureAsset(Config.Asset_Choosed_Config_Save_Folder);
+				m_TextureAsset.LoadChooseConfig();
 			}
 
 			if (m_CurrentAssetBase == null)
 			{
 				m_CurrentAssetBase = m_MaterialAssets;
+				Config.Search_Extensions = m_MaterialAssets.ReplaceAssetsExtensions;
 				m_CurrentAssetBase.CheckDuplication();
 			}
 
@@ -66,7 +81,7 @@ namespace DuplicaionCleaner
 			Config.Search_Path = EditorGUILayout.TextField("Search_Path", Config.Search_Path, GUILayout.MinWidth(100));
 			Config.Search_Extensions = EditorGUILayout.TextField("Search_Extensions", Config.Search_Extensions, GUILayout.MinWidth(100));
 			GUILayout.Space(10);
-			string newSelectAssetType = DrawHeaderButtons(m_AssetTypes, 10, ((ASSETTYPE)0).ToString());
+			string newSelectAssetType = DrawHeaderButtons(m_AssetTypes, 10, m_CurrentAssetBase.AssetType.ToString());
 			if(!string.Equals(newSelectAssetType, m_CurrentAssetBase.AssetType.ToString()))
 			{
 				ChangeCurrentSelectType(newSelectAssetType);
@@ -95,12 +110,12 @@ namespace DuplicaionCleaner
 
 			if (GUILayout.Button("Replace Resoures", GUILayout.MinHeight(30)))
 			{
-
+				m_CurrentAssetBase.ReplaceAssets(Config.Search_Path, Config.Search_Extensions);
 			}
 
 			if (GUILayout.Button("Delete Unuseful", GUILayout.MinHeight(30)))
 			{
-
+				m_CurrentAssetBase.DeleteUnusefulAssets();
 			}
 			GUILayout.EndHorizontal();
 			GUILayout.Space(10);
@@ -112,13 +127,16 @@ namespace DuplicaionCleaner
 			switch (assetType)
 			{
 				case ASSETTYPE.FBX:
+					m_CurrentAssetBase = m_FBXAssets;
 					break;
 				case ASSETTYPE.Materials:
 					m_CurrentAssetBase = m_MaterialAssets;
 					break;
 				case ASSETTYPE.Textures:
+					m_CurrentAssetBase = m_TextureAsset;
 					break;
 			}
+			Config.Search_Extensions = m_CurrentAssetBase.ReplaceAssetsExtensions;
 			m_CurrentAssetBase.CheckDuplication();
 		}
 

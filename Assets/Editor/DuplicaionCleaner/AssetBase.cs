@@ -37,53 +37,70 @@ namespace DuplicaionCleaner
 	{
 		public Dictionary<string, List<AssetFileData>> DuplicationAssetDic;
 		public string ChooseConfigSavePath;
-		public string AssetExtension;
+		public string ReplaceAssetsExtensions;
+		public string[] AssetExtensions;
 		public ASSETTYPE AssetType;
+
+		protected Dictionary<string, bool> m_AssetDownShowStates;
 		
-		private Dictionary<string, bool> m_AssetDownShowStates;
-		private string SearchExtensions;
-
-		public virtual void RemoveUnusefulAssets()
+		public void DeleteUnusefulAssets()
 		{
-
-		}
-
-		public virtual void ReplaceAssets(string relativePath, string extensions)
-		{
-			List<string> assetsPath = DuplicationCleanerHelper.CollectAssets(relativePath, extensions.Split(','));
-			foreach (var duplicationAsset in DuplicationAssetDic)
+			List<string> unusefulAssetsPath = new List<string>();
+			foreach (var duplicaionAsset in DuplicationAssetDic)
 			{
-
-				//筛选出最终使用资源和要替换的资源的GUID
-				List<string> oldAssetGUIDs = new List<string>();
-				string newAssetGUIDs = string.Empty;
-				bool choosedNewAssetGUID = false;
-				int i = 0;
-				for (i = 0; i < duplicationAsset.Value.Count; i++)
-				{
-					string guid = duplicationAsset.Value[i].GUID;
-					if(string.IsNullOrEmpty(guid))
-					{
-						continue;
-					}
-					if (duplicationAsset.Value[i].IsChoosed && !choosedNewAssetGUID)
-					{
-						newAssetGUIDs = guid;
-						choosedNewAssetGUID = true;
-						continue;
-					}
-					oldAssetGUIDs.Add(guid);
-				}
-				if(string.IsNullOrEmpty(newAssetGUIDs) || oldAssetGUIDs.Count <= 0)
+				if (duplicaionAsset.Value == null || duplicaionAsset.Value.Count == 0)
 				{
 					continue;
 				}
 
-				for (i = 0; i < oldAssetGUIDs.Count; i++)
+				for (int i = 0; i < duplicaionAsset.Value.Count; i++)
 				{
-					//DuplicationCleanerHelper.DoReplace()
+					if (!duplicaionAsset.Value[i].IsChoosed)
+					{
+						unusefulAssetsPath.Add(duplicaionAsset.Value[i].AssetPath);
+					}
 				}
 			}
+			for (int i = 0; i < unusefulAssetsPath.Count; i++)
+			{
+				AssetDatabase.DeleteAsset(unusefulAssetsPath[i]);
+			}
+			CheckDuplication();
+		}
+
+		public void ReplaceAssets(string relativePath, string extensions)
+		{
+			string[] assetsPath = DuplicationCleanerHelper.CollectAssets(relativePath, extensions.Split(','));
+
+			if(assetsPath == null)
+			{
+				return;
+			}
+
+			for (int i = 0; i < assetsPath.Length; i++)
+			{
+				SingleFileReplace(assetsPath[i]);
+			}
+
+
+			int currentIndex = 0;
+			EditorApplication.update = delegate ()
+			{
+				string assetPath = assetsPath[currentIndex];
+
+				bool isCancel = EditorUtility.DisplayCancelableProgressBar("正在替换中..."
+																			, assetPath
+																			, (float)currentIndex / (float)assetsPath.Length);
+
+				SingleFileReplace(assetPath);
+				currentIndex++;
+				if (isCancel || currentIndex >= assetsPath.Length)
+				{
+					EditorUtility.ClearProgressBar();
+					EditorApplication.update = null;
+					currentIndex = 0;
+				}
+			};
 		}
 
 		public void LoadChooseConfig()
@@ -110,7 +127,7 @@ namespace DuplicaionCleaner
 			DuplicationCleanerHelper.CheckDuplication(this);
 		}
 
-		public void CheckResource(string name, string relativePath)
+		public void CheckDuplicationResource(string name, string relativePath)
 		{
 			if(DuplicationAssetDic == null)
 			{
@@ -152,8 +169,6 @@ namespace DuplicaionCleaner
 			{
 				DuplicationAssetDic.Remove(unDuplicationList[i]);
 			}
-
-			
 		}
 		
 		public void Draw()
@@ -227,16 +242,42 @@ namespace DuplicaionCleaner
 				DuplicationAssetDic[key].Add(asset);
 			}
 		}
-	}
 
-	public class MaterialAsset : AssetBase
-	{
-		public MaterialAsset(string chooseConfigPath)
+		protected void SingleFileReplace(string fileFullPath)
 		{
-			DuplicationAssetDic = new Dictionary<string, List<AssetFileData>>();
-			AssetExtension = "*.mat";
-			AssetType = ASSETTYPE.Materials;
-			ChooseConfigSavePath = chooseConfigPath;
+			foreach (var duplicationAsset in DuplicationAssetDic)
+			{
+
+				//筛选出最终使用资源和要替换的资源的GUID
+				List<string> oldAssetGUIDs = new List<string>();
+				string newAssetGUIDs = string.Empty;
+				bool choosedNewAssetGUID = false;
+				int i = 0;
+				for (i = 0; i < duplicationAsset.Value.Count; i++)
+				{
+					string guid = duplicationAsset.Value[i].GUID;
+					if (string.IsNullOrEmpty(guid))
+					{
+						continue;
+					}
+					if (duplicationAsset.Value[i].IsChoosed && !choosedNewAssetGUID)
+					{
+						newAssetGUIDs = guid;
+						choosedNewAssetGUID = true;
+						continue;
+					}
+					oldAssetGUIDs.Add(guid);
+				}
+				if (string.IsNullOrEmpty(newAssetGUIDs) || oldAssetGUIDs.Count <= 0)
+				{
+					continue;
+				}
+
+				for (i = 0; i < oldAssetGUIDs.Count; i++)
+				{
+					DuplicationCleanerHelper.DoReplace(fileFullPath, newAssetGUIDs, oldAssetGUIDs[i]);
+				}
+			}
 		}
 	}
 }

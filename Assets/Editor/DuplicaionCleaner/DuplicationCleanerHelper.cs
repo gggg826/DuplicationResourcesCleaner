@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -16,33 +17,19 @@ namespace DuplicaionCleaner
 {
 	public class DuplicationCleanerHelper
 	{
-		public static List<string> CollectAssets(string relativeSearchPath, string[] extensions)
+		public static string[] CollectAssets(string relativeSearchPath, string[] extensions)
 		{
-			List<string> result = new List<string>();
-			if (string.IsNullOrEmpty(relativeSearchPath) || Directory.Exists(relativeSearchPath) || extensions == null)
+			if (string.IsNullOrEmpty(relativeSearchPath) || !Directory.Exists(relativeSearchPath) || extensions == null)
 			{
-				return result;
+				return null;
 			}
-			string[] assetsPath = Directory.GetFiles(relativeSearchPath, "*.*", SearchOption.AllDirectories);
-			for (int i = 0; i < assetsPath.Length; i++)
-			{
-				string currentExt = Path.GetExtension(assetsPath[i]);
-				for (int j = 0; j < extensions.Length; j++)
-				{
-					if(string.Equals(currentExt, extensions[j].TrimStart('.')))
-					{
-						result.Add(GetPathByRelative(assetsPath[i]));
-					}
-				}
-			}
-			return result;
+			List<string> extens = new List<string>(extensions);
+			string[] assetsPath = Directory.GetFiles(GetPathByAbsolute(relativeSearchPath), "*.*", SearchOption.AllDirectories)
+								 .Where(s => extens.Contains(Path.GetExtension(s).ToLower())).ToArray();
+			
+			return assetsPath;
 		}
-
-		public static string DoReplace(string fileFullPath, string strReplace, string[] strFindPattern, bool isBackup = true)
-		{
-			return string.Empty;
-		}
-
+		
 		public static string DoReplace(string fileFullPath, string strReplace, string strFindPattern, bool isBackup = true)
 		{
 			StringBuilder strError = new StringBuilder();
@@ -63,13 +50,17 @@ namespace DuplicaionCleaner
 				{
 					if (isBackup == true)
 					{
+						string backFileFullPath = fileFullPath + ".bak";
 						try
 						{
-							File.Copy(fileFullPath, fileFullPath + ".bak");
+							if (!File.Exists(backFileFullPath))
+							{
+								File.Copy(fileFullPath, backFileFullPath);
+							}
 						}
 						catch (System.IO.IOException ex)
 						{
-							File.Copy(fileFullPath, fileFullPath + ".bak", true);
+							//File.Copy(fileFullPath, backFileFullPath, true);
 							strError.Append("Error:  " + ex.Message);
 						}
 					}
@@ -108,12 +99,13 @@ namespace DuplicaionCleaner
 			string path = GetPathByAbsolute(Config.Art_Path);
 			if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
 			{
-				string[] assetsPathArray = Directory.GetFiles(path, assetsData.AssetExtension, SearchOption.AllDirectories);
-
+				string[] assetsPathArray = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
+				.Where(s => assetsData.AssetExtensions.Contains(Path.GetExtension(s).ToLower())).ToArray();
+				
 				for (int i = 0; i < assetsPathArray.Length; i++)
 				{
 					string assetName = Path.GetFileNameWithoutExtension(assetsPathArray[i]);
-					assetsData.CheckResource(assetName, GetPathByRelative(assetsPathArray[i]));
+					assetsData.CheckDuplicationResource(assetName, GetPathByRelative(assetsPathArray[i]));
 				}
 				assetsData.RemoveUnDuplicationKey();
 			}

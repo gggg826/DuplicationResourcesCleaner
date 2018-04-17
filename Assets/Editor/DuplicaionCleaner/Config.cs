@@ -14,6 +14,6 @@ namespace DuplicaionCleaner
 		public static string Search_Path = "\\Scene\\";
 		public static string Search_Extensions = "*.mat";
 
-		public static string Material_Choosed_Config_Path = "D:\\Mat_Config.txt";
+		public static string Asset_Choosed_Config_Save_Folder = "D:\\Mat_Config.txt";
 	}
 }
