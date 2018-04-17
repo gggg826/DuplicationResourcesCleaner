@@ -310,7 +310,8 @@ namespace DuplicaionCleaner
 
 				for (i = 0; i < oldAssetGUIDs.Count; i++)
 				{
-					DuplicationCleanerHelper.DoReplace(fileFullPath, newAssetGUIDs, oldAssetGUIDs[i]);
+					DuplicationCleanerHelper.DoReplace(fileFullPath, newAssetGUIDs, oldAssetGUIDs[i], false);
+					AssetDatabase.Refresh();
 				}
 			}
 		}
