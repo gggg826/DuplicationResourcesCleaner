@@ -141,6 +141,7 @@ namespace DuplicaionCleaner
 					currentIndex = 0;
 				}
 			};
+			AssetDatabase.Refresh();
 		}
 
 		public void DropUpDownAll(bool isDropDown)
@@ -311,7 +312,6 @@ namespace DuplicaionCleaner
 				for (i = 0; i < oldAssetGUIDs.Count; i++)
 				{
 					DuplicationCleanerHelper.DoReplace(fileFullPath, newAssetGUIDs, oldAssetGUIDs[i], false);
-					AssetDatabase.Refresh();
 				}
 			}
 		}
