@@ -52,8 +52,8 @@ namespace DuplicaionCleaner
 		public void Draw()
 		{
 			GUILayout.BeginHorizontal();
-			IsChoosed = EditorGUILayout.Toggle(IsChoosed);
-			IsDropDown = GUILayout.Toggle(IsDropDown, GroupName, "Button");
+			IsChoosed = GUILayout.Toggle(IsChoosed, GroupName, "Button");
+			//IsDropDown = GUILayout.Toggle(IsDropDown, GroupName, "Button");
 			GUILayout.EndHorizontal();
 			if (IsDropDown)
 			{

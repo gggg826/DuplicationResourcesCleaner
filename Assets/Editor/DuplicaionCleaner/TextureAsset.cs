@@ -15,7 +15,7 @@ namespace DuplicaionCleaner
 		public TextureAsset(string chooseConfigFolder)
 		{
 			DuplicationAssetGroupDic = new Dictionary<string, AssetGroupData>();
-			AssetExtensions = new string[] { ".TGA", ".png" };
+			AssetExtensions = new string[] { ".TGA", ".png", ".bmp" };
 			AssetType = ASSETTYPE.Textures;
 			ReplaceAssetsExtensions = ".prefab,.unity";
 			ChooseConfigSavePath = chooseConfigFolder + "texture_choosed_config.txt";
