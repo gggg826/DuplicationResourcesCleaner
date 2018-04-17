@@ -1,7 +1,12 @@
-﻿using System;
+﻿/********************************************************************
+*	created:	18/4/2018   0:34
+*	filename: 	FBXAsset
+*	author:		Bing Lau
+*	
+*	purpose:	https://github.com/gggg826/DuplicationResourcesCleaner
+*********************************************************************/
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace DuplicaionCleaner
 {
@@ -9,7 +14,7 @@ namespace DuplicaionCleaner
 	{
 		public FBXAsset(string chooseConfigFolder)
 		{
-			DuplicationAssetDic = new Dictionary<string, List<AssetFileData>>();
+			DuplicationAssetGroupDic = new Dictionary<string, AssetGroupData>();
 			AssetExtensions = new string[] { ".FBX" };
 			AssetType = ASSETTYPE.FBX;
 			ReplaceAssetsExtensions = ".prefab,.unity";

@@ -1,7 +1,12 @@
-﻿using System;
+﻿/********************************************************************
+*	created:	18/4/2018   0:33
+*	filename: 	TextureAsset
+*	author:		Bing Lau
+*	
+*	purpose:	https://github.com/gggg826/DuplicationResourcesCleaner
+*********************************************************************/
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace DuplicaionCleaner
 {
@@ -9,7 +14,7 @@ namespace DuplicaionCleaner
 	{
 		public TextureAsset(string chooseConfigFolder)
 		{
-			DuplicationAssetDic = new Dictionary<string, List<AssetFileData>>();
+			DuplicationAssetGroupDic = new Dictionary<string, AssetGroupData>();
 			AssetExtensions = new string[] { ".TGA", ".png" };
 			AssetType = ASSETTYPE.Textures;
 			ReplaceAssetsExtensions = ".prefab,.unity";

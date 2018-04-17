@@ -88,13 +88,13 @@ namespace DuplicaionCleaner
 				return;
 			}
 
-			if (assetsData.DuplicationAssetDic == null)
+			if (assetsData.DuplicationAssetGroupDic == null)
 			{
-				assetsData.DuplicationAssetDic = new Dictionary<string, List<AssetFileData>>();
+				assetsData.DuplicationAssetGroupDic = new Dictionary<string, AssetGroupData>();
 			}
 			else
 			{
-				assetsData.DuplicationAssetDic.Clear();
+				assetsData.DuplicationAssetGroupDic.Clear();
 			}
 
 			string path = GetPathByAbsolute(Config.Art_Path);
@@ -112,11 +112,11 @@ namespace DuplicaionCleaner
 			}
 		}
 
-		public static void ReadConfig(string path, ref Dictionary<string, List<AssetFileData>> assetDic)
+		public static void ReadConfig(string path, ref Dictionary<string, AssetGroupData> assetDic)
 		{
 		}
 
-		public static void SaveConfig(string path, Dictionary<string, List<AssetFileData>> assetDic)
+		public static void SaveConfig(string path, Dictionary<string, AssetGroupData> assetDic)
 		{
 		}
 

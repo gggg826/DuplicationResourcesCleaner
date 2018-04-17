@@ -6,6 +6,7 @@
 *	purpose:	https://github.com/gggg826/DuplicationResourcesCleaner
 *********************************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -33,31 +34,70 @@ namespace DuplicaionCleaner
 		}
 	}
 
+	public class AssetGroupData
+	{
+		public string GroupName;
+		public bool IsChoosed;
+		public bool IsDropDown;
+		public List<AssetFileData> AssetGroupList;
+
+		public AssetGroupData(string groupName)
+		{
+			GroupName = groupName;
+			IsChoosed = true;
+			IsDropDown = true;
+			AssetGroupList = new List<AssetFileData>();
+		}
+
+		public void Draw()
+		{
+			GUILayout.BeginHorizontal();
+			IsChoosed = EditorGUILayout.Toggle(IsChoosed);
+			IsDropDown = GUILayout.Toggle(IsDropDown, GroupName, "Button");
+			GUILayout.EndHorizontal();
+			if (IsDropDown)
+			{
+				EditorGUI.indentLevel++;
+				for (int i = 0; i < AssetGroupList.Count; i++)
+				{
+					AssetGroupList[i].Draw();
+				}
+				EditorGUI.indentLevel--;
+			}
+		}
+	}
+
 	public class AssetBase
 	{
-		public Dictionary<string, List<AssetFileData>> DuplicationAssetDic;
+		public Dictionary<string, AssetGroupData> DuplicationAssetGroupDic;
 		public string ChooseConfigSavePath;
 		public string ReplaceAssetsExtensions;
 		public string[] AssetExtensions;
 		public ASSETTYPE AssetType;
 
-		protected Dictionary<string, bool> m_AssetDownShowStates;
+		//protected Dictionary<string, bool> m_AssetDownShowStates;
 		
 		public void DeleteUnusefulAssets()
 		{
 			List<string> unusefulAssetsPath = new List<string>();
-			foreach (var duplicaionAsset in DuplicationAssetDic)
+			List<AssetFileData> fileGroup = null;
+			foreach (var duplicaionGroupAsset in DuplicationAssetGroupDic)
 			{
-				if (duplicaionAsset.Value == null || duplicaionAsset.Value.Count == 0)
+				if (duplicaionGroupAsset.Value == null || duplicaionGroupAsset.Value.AssetGroupList.Count == 0)
+				{
+					continue;
+				}
+				if(!duplicaionGroupAsset.Value.IsChoosed)
 				{
 					continue;
 				}
 
-				for (int i = 0; i < duplicaionAsset.Value.Count; i++)
+				fileGroup = duplicaionGroupAsset.Value.AssetGroupList;
+				for (int i = 0; i < fileGroup.Count; i++)
 				{
-					if (!duplicaionAsset.Value[i].IsChoosed)
+					if (!fileGroup[i].IsChoosed)
 					{
-						unusefulAssetsPath.Add(duplicaionAsset.Value[i].AssetPath);
+						unusefulAssetsPath.Add(fileGroup[i].AssetPath);
 					}
 				}
 			}
@@ -103,6 +143,18 @@ namespace DuplicaionCleaner
 			};
 		}
 
+		public void DropUpDownAll(bool isDropDown)
+		{
+			if(DuplicationAssetGroupDic == null || DuplicationAssetGroupDic.Count == 0)
+			{
+				return;
+			}
+			foreach (var groupData in DuplicationAssetGroupDic)
+			{
+				groupData.Value.IsDropDown = isDropDown;
+			}
+		}
+
 		public void LoadChooseConfig()
 		{
 			if (string.IsNullOrEmpty(ChooseConfigSavePath))
@@ -112,13 +164,13 @@ namespace DuplicaionCleaner
 
 			if (File.Exists(ChooseConfigSavePath))
 			{
-				DuplicationCleanerHelper.ReadConfig(ChooseConfigSavePath, ref DuplicationAssetDic);
+				DuplicationCleanerHelper.ReadConfig(ChooseConfigSavePath, ref DuplicationAssetGroupDic);
 			}
 		}
 
 		public void SaveChooseConfig()
 		{
-			DuplicationCleanerHelper.SaveConfig(ChooseConfigSavePath, DuplicationAssetDic);
+			DuplicationCleanerHelper.SaveConfig(ChooseConfigSavePath, DuplicationAssetGroupDic);
 			LoadChooseConfig();
 		}
 
@@ -129,7 +181,7 @@ namespace DuplicaionCleaner
 
 		public void CheckDuplicationResource(string name, string relativePath)
 		{
-			if(DuplicationAssetDic == null)
+			if(DuplicationAssetGroupDic == null)
 			{
 				return;
 			}
@@ -139,70 +191,48 @@ namespace DuplicaionCleaner
 
 		public void RemoveUnDuplicationKey()
 		{
-			if(DuplicationAssetDic == null)
+			if(DuplicationAssetGroupDic == null)
 			{
 				return;
 			}
 			
-			if (m_AssetDownShowStates == null)
-			{
-				m_AssetDownShowStates = new Dictionary<string, bool>();
-			}
-			else
-			{
-				m_AssetDownShowStates.Clear();
-			}
-
 			List<string> unDuplicationList = new List<string>();
-			foreach (var duplicaionAsset in DuplicationAssetDic)
+			foreach (var duplicaionAsset in DuplicationAssetGroupDic)
 			{
-				if(duplicaionAsset.Value == null || duplicaionAsset.Value.Count <= 1)
+				if(duplicaionAsset.Value == null || duplicaionAsset.Value.AssetGroupList.Count <= 1)
 				{
 					unDuplicationList.Add(duplicaionAsset.Key);
-				}
-				else
-				{
-					m_AssetDownShowStates.Add(duplicaionAsset.Key, false);
 				}
 			}
 			for (int i = 0; i < unDuplicationList.Count; i++)
 			{
-				DuplicationAssetDic.Remove(unDuplicationList[i]);
+				DuplicationAssetGroupDic.Remove(unDuplicationList[i]);
 			}
 		}
 		
 		public void Draw()
 		{
-			foreach (var duplicaionAsset in DuplicationAssetDic)
+			foreach (var duplicaionGroupAsset in DuplicationAssetGroupDic)
 			{
-				m_AssetDownShowStates[duplicaionAsset.Key] = GUILayout.Toggle(m_AssetDownShowStates[duplicaionAsset.Key], duplicaionAsset.Key, "Button");
-				if (m_AssetDownShowStates[duplicaionAsset.Key])
-				{
-					EditorGUI.indentLevel++;
-					for (int i = 0; i < duplicaionAsset.Value.Count; i++)
-					{
-						duplicaionAsset.Value[i].Draw();
-					}
-					EditorGUI.indentLevel--;
-				}
+				duplicaionGroupAsset.Value.Draw();
 			}
 		}
 
 		protected bool IsContainsAsset(string key, string relativePath)
 		{
-			List<AssetFileData> duplicaionAsset = DuplicationAssetDic[key];
+			AssetGroupData duplicaionAsset = DuplicationAssetGroupDic[key];
 			return IsContainsAsset(duplicaionAsset, relativePath);
 		}
 
-		protected bool IsContainsAsset(List<AssetFileData> assets, string relativePath)
+		protected bool IsContainsAsset(AssetGroupData assetGroup, string relativePath)
 		{
-			if (assets == null)
+			if (assetGroup == null)
 			{
 				return false;
 			}
-			for (int i = 0; i < assets.Count; i++)
+			for (int i = 0; i < assetGroup.AssetGroupList.Count; i++)
 			{
-				if (assets[i].AssetPath == relativePath)
+				if (assetGroup.AssetGroupList[i].AssetPath == relativePath)
 				{
 					return true;
 				}
@@ -224,13 +254,14 @@ namespace DuplicaionCleaner
 			asset.AssetPath = relativePath;
 			asset.AssetName = key;
 
-			List<AssetFileData> assetFiles = DuplicationAssetDic.ContainsKey(key) ? DuplicationAssetDic[key] : null;
-			if (assetFiles == null)
+			AssetGroupData assetGroup = DuplicationAssetGroupDic.ContainsKey(key) ? DuplicationAssetGroupDic[key] : null;
+			if (assetGroup == null)
 			{
-				assetFiles = new List<AssetFileData>();
+				assetGroup = new AssetGroupData(key);
+				assetGroup.IsChoosed = true;
 				asset.IsChoosed = true;
-				assetFiles.Add(asset);
-				DuplicationAssetDic.Add(key, assetFiles);
+				assetGroup.AssetGroupList.Add(asset);
+				DuplicationAssetGroupDic.Add(key, assetGroup);
 			}
 			else
 			{
@@ -239,13 +270,13 @@ namespace DuplicaionCleaner
 					Debug.LogError("Guid Duplication!!  SourceName:" + key);
 				}
 				asset.IsChoosed = false;
-				DuplicationAssetDic[key].Add(asset);
+				DuplicationAssetGroupDic[key].AssetGroupList.Add(asset);
 			}
 		}
 
 		protected void SingleFileReplace(string fileFullPath)
 		{
-			foreach (var duplicationAsset in DuplicationAssetDic)
+			foreach (var duplicationAssetGroup in DuplicationAssetGroupDic)
 			{
 
 				//筛选出最终使用资源和要替换的资源的GUID
@@ -253,14 +284,14 @@ namespace DuplicaionCleaner
 				string newAssetGUIDs = string.Empty;
 				bool choosedNewAssetGUID = false;
 				int i = 0;
-				for (i = 0; i < duplicationAsset.Value.Count; i++)
+				for (i = 0; i < duplicationAssetGroup.Value.AssetGroupList.Count; i++)
 				{
-					string guid = duplicationAsset.Value[i].GUID;
+					string guid = duplicationAssetGroup.Value.AssetGroupList[i].GUID;
 					if (string.IsNullOrEmpty(guid))
 					{
 						continue;
 					}
-					if (duplicationAsset.Value[i].IsChoosed && !choosedNewAssetGUID)
+					if (duplicationAssetGroup.Value.AssetGroupList[i].IsChoosed && !choosedNewAssetGUID)
 					{
 						newAssetGUIDs = guid;
 						choosedNewAssetGUID = true;
