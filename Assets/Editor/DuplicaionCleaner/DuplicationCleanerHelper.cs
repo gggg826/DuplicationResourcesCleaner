@@ -19,12 +19,13 @@ namespace DuplicaionCleaner
 	{
 		public static string[] CollectAssets(string relativeSearchPath, string[] extensions)
 		{
-			if (string.IsNullOrEmpty(relativeSearchPath) || !Directory.Exists(relativeSearchPath) || extensions == null)
+			string absolutePath = GetPathByAbsolute(relativeSearchPath);
+			if (/*string.IsNullOrEmpty(relativeSearchPath) || */!Directory.Exists(absolutePath) || extensions == null)
 			{
 				return null;
 			}
 			List<string> extens = new List<string>(extensions);
-			string[] assetsPath = Directory.GetFiles(GetPathByAbsolute(relativeSearchPath), "*.*", SearchOption.AllDirectories)
+			string[] assetsPath = Directory.GetFiles(absolutePath, "*.*", SearchOption.AllDirectories)
 								 .Where(s => extens.Contains(Path.GetExtension(s).ToLower())).ToArray();
 			
 			return assetsPath;
