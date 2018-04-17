@@ -117,10 +117,10 @@ namespace DuplicaionCleaner
 				return;
 			}
 
-			for (int i = 0; i < assetsPath.Length; i++)
-			{
-				SingleFileReplace(assetsPath[i]);
-			}
+			//for (int i = 0; i < assetsPath.Length; i++)
+			//{
+			//	SingleFileReplace(assetsPath[i]);
+			//}
 
 
 			int currentIndex = 0;

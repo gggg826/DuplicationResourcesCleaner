@@ -49,8 +49,8 @@ namespace DuplicaionCleaner
 
 			if (m_CurrentAssetBase == null)
 			{
-				m_CurrentAssetBase = m_MaterialAssets;
-				Config.Search_Extensions = m_MaterialAssets.ReplaceAssetsExtensions;
+				m_CurrentAssetBase = m_TextureAsset;
+				Config.Search_Extensions = m_TextureAsset.ReplaceAssetsExtensions;
 				m_CurrentAssetBase.CheckDuplication();
 			}
 
