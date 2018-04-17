@@ -37,8 +37,7 @@ namespace DuplicaionCleaner
 			string result = string.Empty;
 			string inputText = string.Empty;
 			string replacement = strReplace;
-			string pat = strFindPattern;
-			Regex r = new Regex(pat, RegexOptions.IgnoreCase);
+			Regex r = new Regex(strFindPattern, RegexOptions.IgnoreCase);
 
 			try
 			{

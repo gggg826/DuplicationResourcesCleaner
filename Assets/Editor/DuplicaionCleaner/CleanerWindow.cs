@@ -90,13 +90,13 @@ namespace DuplicaionCleaner
 			GUILayout.Space(10);
 			GUILayout.Label("Current Duplication Count : " + m_CurrentAssetBase.DuplicationAssetGroupDic.Count);
 			GUILayout.BeginHorizontal();
-			if(GUILayout.Button("Drop Down All", GUILayout.MinWidth(100)))
-			{
-				m_CurrentAssetBase.DropUpDownAll(true);
-			}
 			if (GUILayout.Button("Drop Up All", GUILayout.MinWidth(100)))
 			{
 				m_CurrentAssetBase.DropUpDownAll(false);
+			}
+			if (GUILayout.Button("Drop Down All", GUILayout.MinWidth(100)))
+			{
+				m_CurrentAssetBase.DropUpDownAll(true);
 			}
 			GUILayout.EndHorizontal();
 			m_DuplicationAssetScrollPosition = GUILayout.BeginScrollView(m_DuplicationAssetScrollPosition);
