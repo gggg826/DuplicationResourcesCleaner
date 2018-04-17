@@ -36,6 +36,7 @@ namespace DuplicaionCleaner
 			if (m_CurrentAssetBase == null)
 			{
 				m_CurrentAssetBase = m_MaterialAssets;
+				m_CurrentAssetBase.CheckDuplication();
 			}
 
 			if(m_AssetTypes == null)
@@ -78,24 +79,25 @@ namespace DuplicaionCleaner
 			m_CurrentAssetBase.Draw();
 			GUILayout.EndScrollView();
 
+			GUILayout.Space(10);
 			//底部按钮
 			GUILayout.BeginHorizontal();
-			if (GUILayout.Button("Check Duplication", GUILayout.MinWidth(100)))
+			if (GUILayout.Button("Check Duplication", GUILayout.MinHeight(30)))
 			{
 				m_CurrentAssetBase.CheckDuplication();
 			}
 
-			if (GUILayout.Button("Save Choose", GUILayout.MinWidth(100)))
+			if (GUILayout.Button("Save Choose", GUILayout.MinHeight(30)))
 			{
 				m_CurrentAssetBase.SaveChooseConfig();
 			}
 
-			if (GUILayout.Button("Replace Resoures", GUILayout.MinWidth(100)))
+			if (GUILayout.Button("Replace Resoures", GUILayout.MinHeight(30)))
 			{
 
 			}
 
-			if (GUILayout.Button("Delete Unuseful", GUILayout.MinWidth(100)))
+			if (GUILayout.Button("Delete Unuseful", GUILayout.MinHeight(30)))
 			{
 
 			}
