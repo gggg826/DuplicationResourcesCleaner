@@ -278,6 +278,10 @@ namespace DuplicaionCleaner
 		{
 			foreach (var duplicationAssetGroup in DuplicationAssetGroupDic)
 			{
+				if (!duplicationAssetGroup.Value.IsChoosed)
+				{
+					continue;
+				}
 
 				//筛选出最终使用资源和要替换的资源的GUID
 				List<string> oldAssetGUIDs = new List<string>();
