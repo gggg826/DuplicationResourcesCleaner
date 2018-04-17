@@ -13,32 +13,33 @@ namespace DuplicaionCleaner
 {
 	public class DuplicationCleanerHelper
 	{
-		public static void CheckDuplication(AssetBase assetData)
+		public static void CheckDuplication(AssetBase assetsData)
 		{
-			if(assetData == null)
+			if(assetsData == null)
 			{
 				return;
 			}
 
-			if(assetData.AssetDic == null)
+			if(assetsData.AssetDic == null)
 			{
-				assetData.AssetDic = new Dictionary<string, List<AssetFileData>>();
+				assetsData.AssetDic = new Dictionary<string, List<AssetFileData>>();
 			}
 			else
 			{
-				assetData.AssetDic.Clear();
+				assetsData.AssetDic.Clear();
 			}
 
 			string path = GetArtPathByAbsolute(Config.Art_Path);
 			if (!string.IsNullOrEmpty(path))
 			{
-				string[] assetsPathArray = Directory.GetFiles(path, assetData.AssetType, SearchOption.AllDirectories);
+				string[] assetsPathArray = Directory.GetFiles(path, assetsData.AssetExtension, SearchOption.AllDirectories);
 
 				for (int i = 0; i < assetsPathArray.Length; i++)
 				{
 					string assetName = Path.GetFileNameWithoutExtension(assetsPathArray[i]);
-					assetData.CheckResource(assetName, GetPathByRelative(assetsPathArray[i]));
+					assetsData.CheckResource(assetName, GetPathByRelative(assetsPathArray[i]));
 				}
+				assetsData.RemoveUnDuplicationKey();
 			}
 		}
 

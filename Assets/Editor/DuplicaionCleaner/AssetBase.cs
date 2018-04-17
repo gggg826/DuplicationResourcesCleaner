@@ -15,6 +15,9 @@ namespace DuplicaionCleaner
 {
 	public enum ASSETTYPE
 	{
+		Materials,
+		FBX,
+		Textures,
 	}
 
 	public class AssetFileData
@@ -34,7 +37,9 @@ namespace DuplicaionCleaner
 	{
 		public Dictionary<string, List<AssetFileData>> AssetDic;
 		public string ChooseConfigSavePath;
-		public string AssetType;
+		public string AssetExtension;
+		public ASSETTYPE AssetType;
+		private Dictionary<string, bool> m_AssetDownShowStates;
 
 		public void LoadChooseConfig()
 		{
@@ -76,6 +81,15 @@ namespace DuplicaionCleaner
 			{
 				return;
 			}
+			
+			if (m_AssetDownShowStates == null)
+			{
+				m_AssetDownShowStates = new Dictionary<string, bool>();
+			}
+			else
+			{
+				m_AssetDownShowStates.Clear();
+			}
 
 			List<string> unDuplicationList = new List<string>();
 			foreach (var assets in AssetDic)
@@ -84,25 +98,32 @@ namespace DuplicaionCleaner
 				{
 					unDuplicationList.Add(assets.Key);
 				}
+				else
+				{
+					m_AssetDownShowStates.Add(assets.Key, false);
+				}
 			}
 			for (int i = 0; i < unDuplicationList.Count; i++)
 			{
 				AssetDic.Remove(unDuplicationList[i]);
 			}
+
+			
 		}
 
 		public void Draw()
 		{
 			foreach (var assetData in AssetDic)
 			{
-				if (GUILayout.Button(assetData.Key, GUILayout.MinWidth(100)))
+				m_AssetDownShowStates[assetData.Key] = GUILayout.Toggle(m_AssetDownShowStates[assetData.Key], assetData.Key, "Button");
+				if (m_AssetDownShowStates[assetData.Key])
 				{
 					EditorGUI.indentLevel++;
 					for (int i = 0; i < assetData.Value.Count; i++)
 					{
 						assetData.Value[i].Draw();
 					}
-					EditorGUI.indentLevel++;
+					EditorGUI.indentLevel--;
 				}
 			}
 		}
@@ -143,9 +164,10 @@ namespace DuplicaionCleaner
 			asset.AssetPath = relativePath;
 			asset.AssetName = key;
 
-			List<AssetFileData> assets = AssetDic[key];
+			List<AssetFileData> assets = AssetDic.ContainsKey(key) ? AssetDic[key] : null;
 			if (assets == null)
 			{
+				assets = new List<AssetFileData>();
 				asset.IsChoosed = true;
 				assets.Add(asset);
 				AssetDic.Add(key, assets);
@@ -157,7 +179,7 @@ namespace DuplicaionCleaner
 					Debug.LogError("Guid Duplication!!  SourceName:" + key);
 				}
 				asset.IsChoosed = false;
-				AssetDic.Add(key, assets);
+				AssetDic[key].Add(asset);
 			}
 		}
 	}
@@ -167,7 +189,8 @@ namespace DuplicaionCleaner
 		public MaterialAsset(string chooseConfigPath)
 		{
 			AssetDic = new Dictionary<string, List<AssetFileData>>();
-			AssetType = "*.mat";
+			AssetExtension = "*.mat";
+			AssetType = ASSETTYPE.Materials;
 			ChooseConfigSavePath = chooseConfigPath;
 		}
 	}

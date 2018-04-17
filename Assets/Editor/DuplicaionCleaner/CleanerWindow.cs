@@ -17,6 +17,7 @@ namespace DuplicaionCleaner
 		protected static AssetBase m_CurrentAssetBase;
 		protected static MaterialAsset m_MaterialAssets;
 		protected Vector2 m_DuplicationAssetScrollPosition;
+		protected string[] m_AssetTypes;
 
 		[MenuItem("Window/Duplication Cleaner &d")]
 		public static void OpenLableModifier()
@@ -24,7 +25,7 @@ namespace DuplicaionCleaner
 			GetWindow<CleanerWindow>("Dup Cleaner", true).Show();
 		}
 
-		protected static void Initialize()
+		protected void Initialize()
 		{
 			if(m_MaterialAssets == null)
 			{
@@ -36,15 +37,42 @@ namespace DuplicaionCleaner
 			{
 				m_CurrentAssetBase = m_MaterialAssets;
 			}
+
+			if(m_AssetTypes == null)
+			{
+				m_AssetTypes = Enum.GetNames(typeof(ASSETTYPE));
+			}
 		}
 
 		protected void OnGUI()
 		{
 			Initialize();
 
+			GUILayout.BeginHorizontal();
+			GUILayout.Space(5);
+			GUILayout.BeginVertical();
+			DrawView();
+			GUILayout.EndVertical();
+			GUILayout.Space(5);
+			GUILayout.EndHorizontal();
+			
+		}
+
+		protected void DrawView()
+		{
 			GUILayout.Space(10);
 			Config.Art_Path = EditorGUILayout.TextField("GameobjectName", Config.Art_Path, GUILayout.MinWidth(100));
 			Config.Scenes_Path = EditorGUILayout.TextField("GameobjectName", Config.Scenes_Path, GUILayout.MinWidth(100));
+			GUILayout.Space(10);
+			string newSelectAssetType = DrawHeaderButtons(m_AssetTypes, 10, ((ASSETTYPE)0).ToString());
+			if(!string.Equals(newSelectAssetType, m_CurrentAssetBase.AssetType.ToString()))
+			{
+				ChangeCurrentSelectType(newSelectAssetType);
+			}
+
+			GUILayout.Space(10);
+			GUILayout.Label("Current Duplication Count : " + m_CurrentAssetBase.AssetDic.Count);
+			GUILayout.Space(10);
 
 			m_DuplicationAssetScrollPosition = GUILayout.BeginScrollView(m_DuplicationAssetScrollPosition);
 			m_CurrentAssetBase.Draw();
@@ -73,6 +101,49 @@ namespace DuplicaionCleaner
 			}
 			GUILayout.EndHorizontal();
 			GUILayout.Space(10);
+		}
+
+		protected void ChangeCurrentSelectType(string newSelectAssetType)
+		{
+			ASSETTYPE assetType = (ASSETTYPE)Enum.Parse(typeof(ASSETTYPE), newSelectAssetType);
+			switch (assetType)
+			{
+				case ASSETTYPE.FBX:
+					break;
+				case ASSETTYPE.Materials:
+					m_CurrentAssetBase = m_MaterialAssets;
+					break;
+				case ASSETTYPE.Textures:
+					break;
+			}
+			m_CurrentAssetBase.CheckDuplication();
+		}
+
+		protected string DrawHeaderButtons(string[] texts, int padding, string selectionIndex, int minHeight = 20)
+		{
+			if (texts == null || texts.Length == 0)
+				return string.Empty;
+			string newSelect = selectionIndex;
+			string style = null;
+			GUILayout.BeginHorizontal();
+			GUILayout.Space(padding);
+			for (int index = 0; index < texts.Length; index++)
+			{
+				if (index == 0 && index != texts.Length - 1)
+					style = "ButtonLeft";
+				else if (index == texts.Length - 1 && index != 0)
+					style = "ButtonRight";
+				else
+					style = "ButtonMid";
+
+				if (GUILayout.Toggle(newSelect == texts[index], texts[index], style, GUILayout.MinHeight(minHeight)))
+					newSelect = texts[index];
+				if (newSelect != selectionIndex)
+					selectionIndex = newSelect;
+			}
+			GUILayout.Space(padding);
+			GUILayout.EndHorizontal();
+			return newSelect;
 		}
 	}
 }
