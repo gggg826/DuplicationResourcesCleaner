@@ -62,8 +62,9 @@ namespace DuplicaionCleaner
 		protected void DrawView()
 		{
 			GUILayout.Space(10);
-			Config.Art_Path = EditorGUILayout.TextField("GameobjectName", Config.Art_Path, GUILayout.MinWidth(100));
-			Config.Scenes_Path = EditorGUILayout.TextField("GameobjectName", Config.Scenes_Path, GUILayout.MinWidth(100));
+			Config.Art_Path = EditorGUILayout.TextField("Art_Path", Config.Art_Path, GUILayout.MinWidth(100));
+			Config.Search_Path = EditorGUILayout.TextField("Search_Path", Config.Search_Path, GUILayout.MinWidth(100));
+			Config.Search_Extensions = EditorGUILayout.TextField("Search_Extensions", Config.Search_Extensions, GUILayout.MinWidth(100));
 			GUILayout.Space(10);
 			string newSelectAssetType = DrawHeaderButtons(m_AssetTypes, 10, ((ASSETTYPE)0).ToString());
 			if(!string.Equals(newSelectAssetType, m_CurrentAssetBase.AssetType.ToString()))
@@ -72,7 +73,7 @@ namespace DuplicaionCleaner
 			}
 
 			GUILayout.Space(10);
-			GUILayout.Label("Current Duplication Count : " + m_CurrentAssetBase.AssetDic.Count);
+			GUILayout.Label("Current Duplication Count : " + m_CurrentAssetBase.DuplicationAssetDic.Count);
 			GUILayout.Space(10);
 
 			m_DuplicationAssetScrollPosition = GUILayout.BeginScrollView(m_DuplicationAssetScrollPosition);

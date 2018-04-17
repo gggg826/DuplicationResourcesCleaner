@@ -16,7 +16,34 @@ namespace DuplicaionCleaner
 {
 	public class DuplicationCleanerHelper
 	{
-		private static string DoReplace(string fileFullPath, string strReplace, string strFindPattern, bool isBackup = true)
+		public static List<string> CollectAssets(string relativeSearchPath, string[] extensions)
+		{
+			List<string> result = new List<string>();
+			if (string.IsNullOrEmpty(relativeSearchPath) || Directory.Exists(relativeSearchPath) || extensions == null)
+			{
+				return result;
+			}
+			string[] assetsPath = Directory.GetFiles(relativeSearchPath, "*.*", SearchOption.AllDirectories);
+			for (int i = 0; i < assetsPath.Length; i++)
+			{
+				string currentExt = Path.GetExtension(assetsPath[i]);
+				for (int j = 0; j < extensions.Length; j++)
+				{
+					if(string.Equals(currentExt, extensions[j].TrimStart('.')))
+					{
+						result.Add(GetPathByRelative(assetsPath[i]));
+					}
+				}
+			}
+			return result;
+		}
+
+		public static string DoReplace(string fileFullPath, string strReplace, string[] strFindPattern, bool isBackup = true)
+		{
+			return string.Empty;
+		}
+
+		public static string DoReplace(string fileFullPath, string strReplace, string strFindPattern, bool isBackup = true)
 		{
 			StringBuilder strError = new StringBuilder();
 			string result = string.Empty;
@@ -69,17 +96,17 @@ namespace DuplicaionCleaner
 				return;
 			}
 
-			if (assetsData.AssetDic == null)
+			if (assetsData.DuplicationAssetDic == null)
 			{
-				assetsData.AssetDic = new Dictionary<string, List<AssetFileData>>();
+				assetsData.DuplicationAssetDic = new Dictionary<string, List<AssetFileData>>();
 			}
 			else
 			{
-				assetsData.AssetDic.Clear();
+				assetsData.DuplicationAssetDic.Clear();
 			}
 
-			string path = GetArtPathByAbsolute(Config.Art_Path);
-			if (!string.IsNullOrEmpty(path))
+			string path = GetPathByAbsolute(Config.Art_Path);
+			if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
 			{
 				string[] assetsPathArray = Directory.GetFiles(path, assetsData.AssetExtension, SearchOption.AllDirectories);
 
@@ -110,7 +137,7 @@ namespace DuplicaionCleaner
 			return path.Substring(positionIndex);
 		}
 
-		public static string GetArtPathByAbsolute(string path)
+		public static string GetPathByAbsolute(string path)
 		{
 			return Path.GetFullPath(path);
 		}
