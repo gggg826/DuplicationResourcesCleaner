@@ -26,7 +26,7 @@ namespace DuplicaionCleaner
 			}
 			List<string> extens = new List<string>(extensions);
 			string[] assetsPath = Directory.GetFiles(absolutePath, "*.*", SearchOption.AllDirectories)
-								 .Where(s => extens.Contains(Path.GetExtension(s).ToLower())).ToArray();
+								 .Where(s => extens.Contains(Path.GetExtension(s)/*.ToLower()*/)).ToArray();
 			
 			return assetsPath;
 		}
