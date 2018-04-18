@@ -251,6 +251,7 @@ namespace DuplicaionCleaner
 			{
 				DuplicationAssetGroupDic.Remove(unDuplicationList[i]);
 			}
+			DuplicationAssetGroupDic = DuplicationCleanerHelper.GetSortedDictionary(DuplicationAssetGroupDic);
 		}
 		
 		public void Draw()

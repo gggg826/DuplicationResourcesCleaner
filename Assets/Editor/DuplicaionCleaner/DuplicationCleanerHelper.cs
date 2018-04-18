@@ -133,5 +133,15 @@ namespace DuplicaionCleaner
 		{
 			return Path.GetFullPath(path);
 		}
+
+		public static Dictionary<string, AssetGroupData> GetSortedDictionary(Dictionary<string, AssetGroupData> dic)
+		{
+			Dictionary<string, AssetGroupData> sortedDic;
+
+			sortedDic = (from entry in dic
+						 orderby entry.Key ascending
+						 select entry).ToDictionary(pair => pair.Key, pair => pair.Value);
+			return sortedDic;
+		}
 	}
 }
