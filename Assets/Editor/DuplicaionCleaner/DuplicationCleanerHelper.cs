@@ -100,7 +100,7 @@ namespace DuplicaionCleaner
 			if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
 			{
 				string[] assetsPathArray = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
-				.Where(s => assetsData.AssetExtensions.Contains(Path.GetExtension(s).ToLower())).ToArray();
+				.Where(s => assetsData.AssetExtensions.Contains(Path.GetExtension(s)/*.ToLower()*/)).ToArray();
 				
 				for (int i = 0; i < assetsPathArray.Length; i++)
 				{
