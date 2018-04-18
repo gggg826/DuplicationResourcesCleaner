@@ -28,6 +28,7 @@ namespace DuplicaionCleaner
 		public string AssetName;
 		public bool IsChoosed;
 		public Action<string> OnChoosedChanged;
+		public Action<string> OnPreviousChanged;
 
 		public void Draw()
 		{
@@ -38,6 +39,10 @@ namespace DuplicaionCleaner
 				if(OnChoosedChanged != null)
 				{
 					OnChoosedChanged(GUID);
+				}
+				if (OnPreviousChanged != null)
+				{
+					OnPreviousChanged(AssetPath);
 				}
 			}
 		}
@@ -99,6 +104,7 @@ namespace DuplicaionCleaner
 
 		//protected Dictionary<string, bool> m_AssetDownShowStates;
 		//protected List<string> m_ReplaceAssetsPathList;
+		protected string m_CurrentPreviousShowPath;
 
 		public void DeleteUnusefulAssets()
 		{
@@ -297,7 +303,6 @@ namespace DuplicaionCleaner
 				assetGroup = new AssetGroupData(key);
 				assetGroup.IsChoosed = true;
 				asset.IsChoosed = true;
-				asset.OnChoosedChanged = assetGroup.UpdateSubAssetsToggle;
 				assetGroup.AssetFilesList.Add(asset);
 				DuplicationAssetGroupDic.Add(key, assetGroup);
 			}
@@ -308,8 +313,18 @@ namespace DuplicaionCleaner
 					Debug.LogError("Guid Duplication!!  SourceName:" + key);
 				}
 				asset.IsChoosed = false;
-				asset.OnChoosedChanged = assetGroup.UpdateSubAssetsToggle;
 				DuplicationAssetGroupDic[key].AssetFilesList.Add(asset);
+			}
+			asset.OnChoosedChanged = assetGroup.UpdateSubAssetsToggle;
+			asset.OnPreviousChanged = OnPreviousChanged;
+		}
+
+		protected void OnPreviousChanged(string relativePath)
+		{
+			if(m_CurrentPreviousShowPath != relativePath)
+			{
+				Selection.activeObject = AssetDatabase.LoadAssetAtPath(relativePath, typeof(UnityEngine.Object));
+				m_CurrentPreviousShowPath = relativePath;
 			}
 		}
 
