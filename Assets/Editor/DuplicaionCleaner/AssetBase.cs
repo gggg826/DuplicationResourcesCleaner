@@ -76,7 +76,7 @@ namespace DuplicaionCleaner
 		public ASSETTYPE AssetType;
 
 		//protected Dictionary<string, bool> m_AssetDownShowStates;
-		protected List<string> m_ReplaceAssetsPathList;
+		//protected List<string> m_ReplaceAssetsPathList;
 
 		public void DeleteUnusefulAssets()
 		{
@@ -123,14 +123,14 @@ namespace DuplicaionCleaner
 			//	SingleFileReplace(assetsPath[i]);
 			//}
 
-			if(m_ReplaceAssetsPathList == null)
-			{
-				m_ReplaceAssetsPathList = new List<string>();
-			}
-			else
-			{
-				m_ReplaceAssetsPathList.Clear();
-			}
+			//if(m_ReplaceAssetsPathList == null)
+			//{
+			//	m_ReplaceAssetsPathList = new List<string>();
+			//}
+			//else
+			//{
+			//	m_ReplaceAssetsPathList.Clear();
+			//}
 
 			int currentIndex = 0;
 			EditorApplication.update = delegate ()
@@ -151,11 +151,11 @@ namespace DuplicaionCleaner
 				}
 			};
 
-			for (int i = 0; i < m_ReplaceAssetsPathList.Count; i++)
-			{
-				AssetDatabase.ImportAsset(DuplicationCleanerHelper.GetPathByRelative(m_ReplaceAssetsPathList[i]));
-			}
-			AssetDatabase.Refresh();
+			//for (int i = 0; i < m_ReplaceAssetsPathList.Count; i++)
+			//{
+			//	AssetDatabase.ImportAsset(DuplicationCleanerHelper.GetPathByRelative(m_ReplaceAssetsPathList[i]));
+			//}
+			//AssetDatabase.Refresh();
 		}
 
 		public void DropUpDownAll(bool isDropDown)
@@ -326,7 +326,9 @@ namespace DuplicaionCleaner
 				for (i = 0; i < oldAssetGUIDs.Count; i++)
 				{
 					DuplicationCleanerHelper.DoReplace(fileFullPath, newAssetGUIDs, oldAssetGUIDs[i], false);
-					m_ReplaceAssetsPathList.Add(fileFullPath);
+					//m_ReplaceAssetsPathList.Add(fileFullPath);
+					AssetDatabase.SaveAssets();
+					AssetDatabase.Refresh();
 				}
 			}
 		}
