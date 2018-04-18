@@ -352,6 +352,7 @@ namespace DuplicaionCleaner
 					DuplicationCleanerHelper.DoReplace(fileFullPath, newAssetGUIDs, oldAssetGUIDs[i], false);
 					//m_ReplaceAssetsPathList.Add(fileFullPath);
 					AssetDatabase.SaveAssets();
+					AssetDatabase.Refresh();
 				}
 			}
 		}
