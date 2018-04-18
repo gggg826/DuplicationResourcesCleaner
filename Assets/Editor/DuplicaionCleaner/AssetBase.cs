@@ -27,10 +27,19 @@ namespace DuplicaionCleaner
 		public string AssetPath;
 		public string AssetName;
 		public bool IsChoosed;
+		public Action<string> OnChoosedChanged;
 
 		public void Draw()
 		{
-			IsChoosed = EditorGUILayout.ToggleLeft(AssetPath, IsChoosed);
+			bool newChoosed = EditorGUILayout.ToggleLeft(AssetPath, IsChoosed);
+			if(newChoosed != IsChoosed)
+			{
+				//IsChoosed = newChoosed;
+				if(OnChoosedChanged != null)
+				{
+					OnChoosedChanged(GUID);
+				}
+			}
 		}
 	}
 
@@ -39,14 +48,14 @@ namespace DuplicaionCleaner
 		public string GroupName;
 		public bool IsChoosed;
 		public bool IsDropDown;
-		public List<AssetFileData> AssetGroupList;
+		public List<AssetFileData> AssetFilesList;
 
 		public AssetGroupData(string groupName)
 		{
 			GroupName = groupName;
 			IsChoosed = true;
 			IsDropDown = true;
-			AssetGroupList = new List<AssetFileData>();
+			AssetFilesList = new List<AssetFileData>();
 		}
 
 		public void Draw()
@@ -58,11 +67,24 @@ namespace DuplicaionCleaner
 			if (IsDropDown)
 			{
 				EditorGUI.indentLevel++;
-				for (int i = 0; i < AssetGroupList.Count; i++)
+				for (int i = 0; i < AssetFilesList.Count; i++)
 				{
-					AssetGroupList[i].Draw();
+					AssetFilesList[i].Draw();
 				}
 				EditorGUI.indentLevel--;
+			}
+		}
+
+		public void UpdateSubAssetsToggle(string currentChoosedGuid)
+		{
+			for (int i = 0; i < AssetFilesList.Count; i++)
+			{
+				if(AssetFilesList[i].GUID == currentChoosedGuid)
+				{
+					AssetFilesList[i].IsChoosed = true;
+					continue;
+				}
+				AssetFilesList[i].IsChoosed = false;
 			}
 		}
 	}
@@ -84,7 +106,7 @@ namespace DuplicaionCleaner
 			List<AssetFileData> fileGroup = null;
 			foreach (var duplicaionGroupAsset in DuplicationAssetGroupDic)
 			{
-				if (duplicaionGroupAsset.Value == null || duplicaionGroupAsset.Value.AssetGroupList.Count == 0)
+				if (duplicaionGroupAsset.Value == null || duplicaionGroupAsset.Value.AssetFilesList.Count == 0)
 				{
 					continue;
 				}
@@ -93,7 +115,7 @@ namespace DuplicaionCleaner
 					continue;
 				}
 
-				fileGroup = duplicaionGroupAsset.Value.AssetGroupList;
+				fileGroup = duplicaionGroupAsset.Value.AssetFilesList;
 				for (int i = 0; i < fileGroup.Count; i++)
 				{
 					if (!fileGroup[i].IsChoosed)
@@ -155,7 +177,7 @@ namespace DuplicaionCleaner
 			//{
 			//	AssetDatabase.ImportAsset(DuplicationCleanerHelper.GetPathByRelative(m_ReplaceAssetsPathList[i]));
 			//}
-			//AssetDatabase.Refresh();
+			AssetDatabase.Refresh();
 		}
 
 		public void DropUpDownAll(bool isDropDown)
@@ -214,7 +236,7 @@ namespace DuplicaionCleaner
 			List<string> unDuplicationList = new List<string>();
 			foreach (var duplicaionAsset in DuplicationAssetGroupDic)
 			{
-				if(duplicaionAsset.Value == null || duplicaionAsset.Value.AssetGroupList.Count <= 1)
+				if(duplicaionAsset.Value == null || duplicaionAsset.Value.AssetFilesList.Count <= 1)
 				{
 					unDuplicationList.Add(duplicaionAsset.Key);
 				}
@@ -245,9 +267,9 @@ namespace DuplicaionCleaner
 			{
 				return false;
 			}
-			for (int i = 0; i < assetGroup.AssetGroupList.Count; i++)
+			for (int i = 0; i < assetGroup.AssetFilesList.Count; i++)
 			{
-				if (assetGroup.AssetGroupList[i].AssetPath == relativePath)
+				if (assetGroup.AssetFilesList[i].AssetPath == relativePath)
 				{
 					return true;
 				}
@@ -275,7 +297,8 @@ namespace DuplicaionCleaner
 				assetGroup = new AssetGroupData(key);
 				assetGroup.IsChoosed = true;
 				asset.IsChoosed = true;
-				assetGroup.AssetGroupList.Add(asset);
+				asset.OnChoosedChanged = assetGroup.UpdateSubAssetsToggle;
+				assetGroup.AssetFilesList.Add(asset);
 				DuplicationAssetGroupDic.Add(key, assetGroup);
 			}
 			else
@@ -285,7 +308,8 @@ namespace DuplicaionCleaner
 					Debug.LogError("Guid Duplication!!  SourceName:" + key);
 				}
 				asset.IsChoosed = false;
-				DuplicationAssetGroupDic[key].AssetGroupList.Add(asset);
+				asset.OnChoosedChanged = assetGroup.UpdateSubAssetsToggle;
+				DuplicationAssetGroupDic[key].AssetFilesList.Add(asset);
 			}
 		}
 
@@ -303,14 +327,14 @@ namespace DuplicaionCleaner
 				string newAssetGUIDs = string.Empty;
 				bool choosedNewAssetGUID = false;
 				int i = 0;
-				for (i = 0; i < duplicationAssetGroup.Value.AssetGroupList.Count; i++)
+				for (i = 0; i < duplicationAssetGroup.Value.AssetFilesList.Count; i++)
 				{
-					string guid = duplicationAssetGroup.Value.AssetGroupList[i].GUID;
+					string guid = duplicationAssetGroup.Value.AssetFilesList[i].GUID;
 					if (string.IsNullOrEmpty(guid))
 					{
 						continue;
 					}
-					if (duplicationAssetGroup.Value.AssetGroupList[i].IsChoosed && !choosedNewAssetGUID)
+					if (duplicationAssetGroup.Value.AssetFilesList[i].IsChoosed && !choosedNewAssetGUID)
 					{
 						newAssetGUIDs = guid;
 						choosedNewAssetGUID = true;
@@ -328,7 +352,6 @@ namespace DuplicaionCleaner
 					DuplicationCleanerHelper.DoReplace(fileFullPath, newAssetGUIDs, oldAssetGUIDs[i], false);
 					//m_ReplaceAssetsPathList.Add(fileFullPath);
 					AssetDatabase.SaveAssets();
-					AssetDatabase.Refresh();
 				}
 			}
 		}
